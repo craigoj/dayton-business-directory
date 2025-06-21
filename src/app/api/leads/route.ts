@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { getPrisma } from '@/lib/db'
 import { leadSchema } from '@/lib/validations'
 import { SocketService } from '@/lib/socket'
 import { LeadStatus, Priority } from '@prisma/client'
@@ -9,9 +9,11 @@ import { LeadStatus, Priority } from '@prisma/client'
 export async function GET(request: NextRequest) {
   try {
     // Skip during build time
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL) {
       return NextResponse.json({ leads: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } })
     }
+    
+    const prisma = getPrisma()
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
-    const where: any = {}
+    const where: Record<string, any> = {}
 
     // If user is business owner, filter by their businesses
     if (session.user.role === 'BUSINESS_OWNER') {
@@ -85,6 +87,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 })
+    }
+    
+    const prisma = getPrisma()
     const body = await request.json()
     const validatedData = leadSchema.parse(body)
 

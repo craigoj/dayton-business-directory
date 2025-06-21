@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { getPrisma } from '@/lib/db'
 import { businessSchema } from '@/lib/validations'
 import { BusinessCategory, BusinessStatus } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
     // Skip during build time
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    if (!process.env.DATABASE_URL) {
       return NextResponse.json({ businesses: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } })
     }
+    
+    const prisma = getPrisma()
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category') as BusinessCategory | null
     const city = searchParams.get('city')
@@ -90,6 +92,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 })
+    }
+    
+    const prisma = getPrisma()
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
