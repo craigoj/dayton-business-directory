@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  businesses  Business[]
+  leads       Lead[]
+  analytics   Analytics[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Business {
+  id              String            @id @default(cuid())
+  name            String
+  slug            String            @unique
+  description     String?           @db.Text
+  category        BusinessCategory
+  phone           String?
+  email           String?
+  website         String?
+  address         String
+  city            String
+  state           String
+  zipCode         String
+  latitude        Float?
+  longitude       Float?
+  hours           Json?
+  images          String[]
+  verified        Boolean           @default(false)
+  featured        Boolean           @default(false)
+  status          BusinessStatus    @default(ACTIVE)
+  brightDataId    String?
+  lastDataSync    DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  ownerId         String
+
+  owner         User        @relation(fields: [ownerId], references: [id])
+  leads         Lead[]
+  analytics     Analytics[]
+  reviews       Review[]
+
+  @@index([category])
+  @@index([city, state])
+  @@index([featured])
+  @@index([status])
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  message     String?    @db.Text
+  source      LeadSource @default(WEBSITE)
+  status      LeadStatus @default(NEW)
+  priority    Priority   @default(MEDIUM)
+  assignedAt  DateTime?
+  respondedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  businessId  String
+  userId      String?
+
+  business Business @relation(fields: [businessId], references: [id])
+  assignedTo User?  @relation(fields: [userId], references: [id])
+
+  @@index([businessId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int      @db.SmallInt
+  title      String?
+  content    String?  @db.Text
+  authorName String
+  authorEmail String?
+  verified   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  businessId String
+
+  business Business @relation(fields: [businessId], references: [id])
+
+  @@index([businessId])
+  @@index([rating])
+}
+
+model Analytics {
+  id          String        @id @default(cuid())
+  date        DateTime      @db.Date
+  metric      AnalyticType
+  value       Int
+  metadata    Json?
+  businessId  String?
+  userId      String?
+
+  business Business? @relation(fields: [businessId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id])
+
+  @@unique([date, metric, businessId, userId])
+  @@index([date])
+  @@index([metric])
+}
+
+enum UserRole {
+  USER
+  BUSINESS_OWNER
+  ADMIN
+}
+
+enum BusinessCategory {
+  RESTAURANT
+  RETAIL
+  SERVICES
+  HEALTHCARE
+  AUTOMOTIVE
+  REAL_ESTATE
+  ENTERTAINMENT
+  FITNESS
+  BEAUTY
+  EDUCATION
+  TECHNOLOGY
+  OTHER
+}
+
+enum BusinessStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum LeadSource {
+  WEBSITE
+  PHONE
+  EMAIL
+  REFERRAL
+  SOCIAL_MEDIA
+  BRIGHTDATA
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum AnalyticType {
+  PAGE_VIEWS
+  LEAD_GENERATED
+  PHONE_CALLS
+  EMAIL_CLICKS
+  WEBSITE_CLICKS
+  PROFILE_VIEWS
+  SEARCH_APPEARANCES
+}
