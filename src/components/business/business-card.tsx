@@ -17,6 +17,7 @@ interface BusinessCardProps {
   }
   showLeadButton?: boolean
   compact?: boolean
+  variant?: 'vertical' | 'horizontal'
   className?: string
 }
 
@@ -24,6 +25,7 @@ export function BusinessCard({
   business, 
   showLeadButton = true, 
   compact = false,
+  variant = 'vertical',
   className
 }: BusinessCardProps) {
   const categoryColors = {
@@ -39,6 +41,107 @@ export function BusinessCard({
     EDUCATION: 'bg-indigo-100 text-indigo-800 border-indigo-200',
     TECHNOLOGY: 'bg-cyan-100 text-cyan-800 border-cyan-200',
     OTHER: 'bg-gray-100 text-gray-800 border-gray-200',
+  }
+
+  if (variant === 'horizontal') {
+    return (
+      <Card className={cn(
+        'hover:shadow-xl transition-all duration-200 border-0 shadow-md',
+        'hover:transform hover:scale-[1.01]',
+        className
+      )}>
+        <CardContent className="p-6">
+          <div className="flex gap-6">
+            {/* Placeholder for business image */}
+            <div className="w-20 h-20 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center">
+              <div className="text-2xl">{business.category === 'RESTAURANT' ? '🍽️' : business.category === 'RETAIL' ? '🛍️' : business.category === 'HEALTHCARE' ? '🏥' : '🏢'}</div>
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 min-w-0 space-y-3">
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <Link 
+                    href={`/business/${business.slug}`}
+                    className="font-bold text-lg hover:text-primary transition-colors line-clamp-1"
+                  >
+                    {business.name}
+                  </Link>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge 
+                      variant="secondary" 
+                      className={cn(
+                        categoryColors[business.category],
+                        'border text-xs font-medium px-2 py-1 rounded-md'
+                      )}
+                    >
+                      {business.category.replace('_', ' ')}
+                    </Badge>
+                    {business.verified && (
+                      <Badge 
+                        variant="secondary" 
+                        className="bg-green-100 text-green-800 border-green-200 px-2 py-1 rounded-full flex items-center gap-1 text-xs font-medium"
+                      >
+                        <CheckCircle className="w-3 h-3" />
+                        Verified
+                      </Badge>
+                    )}
+                    {business.featured && (
+                      <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-xs font-medium px-2 py-1 rounded-md">
+                        ⭐ Featured
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Rating and Address */}
+              <div className="space-y-2">
+                {business.avgRating && business.avgRating > 0 && (
+                  <StarRating
+                    rating={business.avgRating}
+                    reviewCount={business.totalReviews}
+                    size="sm"
+                    showValue={true}
+                  />
+                )}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">
+                    {business.address}, {business.city}, {business.state}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description */}
+              {business.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {business.description}
+                </p>
+              )}
+
+              {/* Action Buttons */}
+              {showLeadButton && (
+                <div className="flex gap-2">
+                  <Button size="sm" asChild>
+                    <Link href={`/business/${business.slug}/contact`}>
+                      <Mail className="w-4 h-4 mr-2" />
+                      Contact
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/business/${business.slug}`}>
+                      Details
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

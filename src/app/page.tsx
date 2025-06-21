@@ -25,7 +25,10 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
-              <Link href="/directory">Browse Businesses</Link>
+              <Link href="/search">Search Businesses</Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
+              <Link href="/directory">Browse Directory</Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
               <Link href="/auth/register">List Your Business</Link>
