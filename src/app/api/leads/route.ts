@@ -8,6 +8,10 @@ import { LeadStatus, Priority } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
+    // Skip during build time
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return NextResponse.json({ leads: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } })
+    }
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

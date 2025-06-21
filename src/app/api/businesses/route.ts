@@ -7,6 +7,10 @@ import { BusinessCategory, BusinessStatus } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
+    // Skip during build time
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return NextResponse.json({ businesses: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } })
+    }
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category') as BusinessCategory | null
     const city = searchParams.get('city')
