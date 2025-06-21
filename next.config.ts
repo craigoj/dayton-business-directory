@@ -13,8 +13,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
   },
+  serverExternalPackages: ['@prisma/client', 'bcryptjs'],
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
