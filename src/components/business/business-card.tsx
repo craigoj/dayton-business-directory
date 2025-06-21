@@ -4,8 +4,9 @@ import { BusinessWithRelations } from '@/types'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Star, MapPin, Phone, Globe, Clock } from 'lucide-react'
-import { formatPhoneNumber } from '@/lib/utils'
+import { StarRating } from '@/components/ui/star-rating'
+import { MapPin, Phone, Globe, Clock, Mail, CheckCircle, ExternalLink } from 'lucide-react'
+import { formatPhoneNumber, cn } from '@/lib/utils'
 import Link from 'next/link'
 
 interface BusinessCardProps {
@@ -16,137 +17,211 @@ interface BusinessCardProps {
   }
   showLeadButton?: boolean
   compact?: boolean
+  className?: string
 }
 
 export function BusinessCard({ 
   business, 
   showLeadButton = true, 
-  compact = false 
+  compact = false,
+  className
 }: BusinessCardProps) {
   const categoryColors = {
-    RESTAURANT: 'bg-orange-100 text-orange-800',
-    RETAIL: 'bg-blue-100 text-blue-800',
-    SERVICES: 'bg-green-100 text-green-800',
-    HEALTHCARE: 'bg-red-100 text-red-800',
-    AUTOMOTIVE: 'bg-gray-100 text-gray-800',
-    REAL_ESTATE: 'bg-purple-100 text-purple-800',
-    ENTERTAINMENT: 'bg-pink-100 text-pink-800',
-    FITNESS: 'bg-teal-100 text-teal-800',
-    BEAUTY: 'bg-rose-100 text-rose-800',
-    EDUCATION: 'bg-indigo-100 text-indigo-800',
-    TECHNOLOGY: 'bg-cyan-100 text-cyan-800',
-    OTHER: 'bg-gray-100 text-gray-800',
+    RESTAURANT: 'bg-orange-100 text-orange-800 border-orange-200',
+    RETAIL: 'bg-blue-100 text-blue-800 border-blue-200',
+    SERVICES: 'bg-green-100 text-green-800 border-green-200',
+    HEALTHCARE: 'bg-red-100 text-red-800 border-red-200',
+    AUTOMOTIVE: 'bg-gray-100 text-gray-800 border-gray-200',
+    REAL_ESTATE: 'bg-purple-100 text-purple-800 border-purple-200',
+    ENTERTAINMENT: 'bg-pink-100 text-pink-800 border-pink-200',
+    FITNESS: 'bg-teal-100 text-teal-800 border-teal-200',
+    BEAUTY: 'bg-rose-100 text-rose-800 border-rose-200',
+    EDUCATION: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    TECHNOLOGY: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+    OTHER: 'bg-gray-100 text-gray-800 border-gray-200',
   }
 
   return (
-    <Card className={`h-full hover:shadow-lg transition-shadow ${compact ? 'p-2' : ''}`}>
-      <CardHeader className={compact ? 'pb-2' : 'pb-4'}>
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
+    <Card className={cn(
+      'h-full hover:shadow-xl transition-all duration-200 border-0 shadow-md',
+      'hover:transform hover:scale-[1.02]',
+      compact ? 'p-3' : 'p-0',
+      className
+    )}>
+      <CardHeader className={cn(
+        'pb-3',
+        compact ? 'p-0 pb-2' : 'p-6 pb-3'
+      )}>
+        <div className="flex flex-col space-y-3">
+          {/* Top row - Title and Verification */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
               <Link 
                 href={`/business/${business.slug}`}
-                className="text-lg font-semibold hover:text-primary truncate"
+                className={cn(
+                  'font-bold hover:text-primary transition-colors line-clamp-2',
+                  compact ? 'text-base' : 'text-lg sm:text-xl'
+                )}
               >
                 {business.name}
               </Link>
-              {business.featured && (
-                <Badge className="bg-yellow-100 text-yellow-800">Featured</Badge>
-              )}
             </div>
             
+            {business.verified && (
+              <Badge 
+                variant="secondary" 
+                className="bg-green-100 text-green-800 border-green-200 px-2 py-1 rounded-full flex items-center gap-1 text-xs font-medium whitespace-nowrap"
+              >
+                <CheckCircle className="w-3 h-3" />
+                Verified
+              </Badge>
+            )}
+          </div>
+
+          {/* Second row - Category and Featured */}
+          <div className="flex items-center justify-between gap-2">
             <Badge 
               variant="secondary" 
-              className={categoryColors[business.category]}
+              className={cn(
+                categoryColors[business.category],
+                'border text-xs font-medium px-2 py-1 rounded-md'
+              )}
             >
               {business.category.replace('_', ' ')}
             </Badge>
+            
+            {business.featured && (
+              <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 text-xs font-medium px-2 py-1 rounded-md">
+                ⭐ Featured
+              </Badge>
+            )}
           </div>
-          
+
+          {/* Third row - Rating */}
           {business.avgRating && business.avgRating > 0 && (
-            <div className="flex items-center gap-1 text-sm">
-              <Star className="w-4 h-4 text-yellow-500 fill-current" />
-              <span className="font-medium">{business.avgRating.toFixed(1)}</span>
-              {business.totalReviews && (
-                <span className="text-muted-foreground">
-                  ({business.totalReviews})
-                </span>
+            <div className="flex items-center justify-between">
+              <StarRating
+                rating={business.avgRating}
+                reviewCount={business.totalReviews}
+                size={compact ? 'sm' : 'md'}
+                showValue={true}
+              />
+              {!compact && business.totalReviews && business.totalReviews > 0 && (
+                <Link 
+                  href={`/business/${business.slug}#reviews`}
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Read reviews
+                </Link>
               )}
             </div>
           )}
         </div>
       </CardHeader>
 
-      <CardContent className={compact ? 'pt-0' : ''}>
-        <div className="space-y-3">
-          {/* Address */}
-          <div className="flex items-start gap-2 text-sm text-muted-foreground">
-            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <span className="truncate">
-              {business.address}, {business.city}, {business.state} {business.zipCode}
-            </span>
-          </div>
-
-          {/* Description */}
-          {business.description && !compact && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {business.description}
+      <CardContent className={cn(
+        'space-y-4',
+        compact ? 'p-0 pt-0' : 'p-6 pt-0'
+      )}>
+        {/* Address */}
+        <div className="flex items-start gap-3">
+          <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-muted-foreground">
+              {business.address}
             </p>
-          )}
-
-          {/* Contact Info */}
-          <div className="flex flex-col gap-2">
-            {business.phone && (
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="w-4 h-4 text-muted-foreground" />
-                <a 
-                  href={`tel:${business.phone}`}
-                  className="text-primary hover:underline"
-                >
-                  {formatPhoneNumber(business.phone)}
-                </a>
-              </div>
-            )}
-
-            {business.website && (
-              <div className="flex items-center gap-2 text-sm">
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <a 
-                  href={business.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline truncate"
-                >
-                  Visit Website
-                </a>
-              </div>
-            )}
+            <p className="text-sm text-muted-foreground">
+              {business.city}, {business.state} {business.zipCode}
+            </p>
           </div>
+        </div>
 
-          {/* Hours */}
-          {business.hours && !compact && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              <span>View Hours</span>
-            </div>
+        {/* Description */}
+        {business.description && !compact && (
+          <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+            {business.description}
+          </p>
+        )}
+
+        {/* Contact Information Grid */}
+        <div className={cn(
+          'grid gap-3',
+          compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'
+        )}>
+          {business.phone && (
+            <a 
+              href={`tel:${business.phone}`}
+              className="flex items-center gap-2 text-sm hover:text-primary transition-colors group"
+            >
+              <Phone className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span>{formatPhoneNumber(business.phone)}</span>
+            </a>
           )}
 
-          {/* Action Buttons */}
-          {showLeadButton && (
-            <div className="flex gap-2 pt-2">
-              <Button asChild className="flex-1">
-                <Link href={`/business/${business.slug}/contact`}>
-                  Contact Business
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href={`/business/${business.slug}`}>
-                  View Details
-                </Link>
-              </Button>
-            </div>
+          {business.email && (
+            <a 
+              href={`mailto:${business.email}`}
+              className="flex items-center gap-2 text-sm hover:text-primary transition-colors group"
+            >
+              <Mail className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="truncate">{business.email}</span>
+            </a>
+          )}
+
+          {business.website && (
+            <a 
+              href={business.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm hover:text-primary transition-colors group"
+            >
+              <Globe className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="truncate">Visit Website</span>
+              <ExternalLink className="w-3 h-3 opacity-50" />
+            </a>
           )}
         </div>
+
+        {/* Hours - Show when available and not compact */}
+        {business.hours && !compact && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="w-4 h-4" />
+            <span>Business Hours Available</span>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {showLeadButton && (
+          <div className={cn(
+            'flex gap-2 pt-2',
+            compact ? 'flex-col' : 'flex-row'
+          )}>
+            <Button 
+              asChild 
+              className={cn(
+                'transition-all duration-200 hover:shadow-md',
+                compact ? 'w-full' : 'flex-1'
+              )}
+            >
+              <Link href={`/business/${business.slug}/contact`}>
+                <Mail className="w-4 h-4 mr-2" />
+                Contact Business
+              </Link>
+            </Button>
+            <Button 
+              variant="outline" 
+              asChild
+              className={cn(
+                'transition-all duration-200 hover:shadow-md border-2',
+                compact ? 'w-full' : 'min-w-[120px]'
+              )}
+            >
+              <Link href={`/business/${business.slug}`}>
+                View Details
+              </Link>
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
