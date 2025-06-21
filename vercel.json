@@ -1,13 +1,16 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "prisma generate && npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "installCommand": "npm install && prisma generate",
   "outputDirectory": ".next",
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     }
+  },
+  "env": {
+    "PRISMA_GENERATE_DATAPROXY": "true"
   },
   "headers": [
     {
