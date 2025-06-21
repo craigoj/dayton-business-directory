@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate')
     const period = searchParams.get('period') || '30' // days
 
-    const where: any = {}
+    const where: Record<string, any> = {}
 
     // If user is business owner, filter by their businesses
     if (session.user.role === 'BUSINESS_OWNER') {
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (metric) where.metric = metric
 
     // Date filtering
-    const dateFilter: any = {}
+    const dateFilter: Record<string, any> = {}
     if (startDate && endDate) {
       dateFilter.gte = new Date(startDate)
       dateFilter.lte = new Date(endDate)
