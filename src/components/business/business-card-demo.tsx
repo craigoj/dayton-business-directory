@@ -2,6 +2,9 @@
 
 import { BusinessCard } from './business-card'
 import { BusinessWithRelations } from '@/types'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 // Sample business data for demonstration
 const sampleBusiness: BusinessWithRelations & { avgRating: number; totalReviews: number; totalLeads: number } = {
@@ -94,9 +97,17 @@ export function BusinessCardDemo() {
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Enhanced Business Cards</h1>
-          <p className="text-gray-600">Responsive business listing cards with ratings, verification, and contact features</p>
+        <div className="space-y-4">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/demo/search">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Search Demo
+            </Link>
+          </Button>
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold text-gray-900">Enhanced Business Cards</h1>
+            <p className="text-gray-600">Responsive business listing cards with ratings, verification, and contact features</p>
+          </div>
         </div>
 
         {/* Single Column Layout */}
@@ -162,6 +173,25 @@ export function BusinessCardDemo() {
             </div>
           </div>
         </section>
+
+        {/* Navigation */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+          <Button asChild>
+            <Link href="/demo/lead-capture">
+              View Lead Capture Demo
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/demo/search">
+              Back to Search Demo
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/">
+              Back to Homepage
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   )

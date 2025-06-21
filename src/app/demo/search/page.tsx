@@ -300,6 +300,11 @@ export default function SearchDemoPage() {
               </Link>
             </Button>
             <Button variant="outline" asChild>
+              <Link href="/demo/lead-capture">
+                View Lead Capture Demo
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
               <Link href="/demo/business-cards">
                 View Business Cards Demo
               </Link>
